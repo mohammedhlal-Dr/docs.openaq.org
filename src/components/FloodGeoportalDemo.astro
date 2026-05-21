@@ -1,0 +1,116 @@
+---
+---
+<section class="flood-demo">
+  <div class="toolbar">
+    <div class="chip">Run: 2026-05-21 12:00 UTC</div>
+    <label>
+      Lead time
+      <input type="range" min="0" max="72" value="24" step="6" id="lead-slider" />
+      <span id="lead-value">+24h</span>
+    </label>
+  </div>
+
+  <div id="flood-demo-map" class="map" role="img" aria-label="Flood risk demo map"></div>
+
+  <div class="panels">
+    <article>
+      <h3>Legend</h3>
+      <ul>
+        <li><span class="swatch severe"></span> Severe inundation (&gt; 1.5m)</li>
+        <li><span class="swatch warning"></span> Warning (0.5m – 1.5m)</li>
+        <li><span class="swatch watch"></span> Watch (&lt; 0.5m)</li>
+      </ul>
+    </article>
+    <article>
+      <h3>Alerts</h3>
+      <ul id="alerts-list">
+        <li><strong>Severe:</strong> Delta Ward (12,400 exposed)</li>
+        <li><strong>Warning:</strong> Riverbend Sector (5,700 exposed)</li>
+        <li><strong>Watch:</strong> East Canal (2,100 exposed)</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
+<script is:inline src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+<script is:inline>
+  const polygonsByLead = {
+    0: [
+      [[90.40, 23.73],[90.46,23.73],[90.46,23.77],[90.40,23.77],[90.40,23.73]],
+    ],
+    24: [
+      [[90.38, 23.71],[90.49,23.71],[90.49,23.79],[90.38,23.79],[90.38,23.71]],
+      [[90.50, 23.72],[90.56,23.72],[90.56,23.76],[90.50,23.76],[90.50,23.72]],
+    ],
+    48: [
+      [[90.36, 23.69],[90.52,23.69],[90.52,23.81],[90.36,23.81],[90.36,23.69]],
+      [[90.53, 23.70],[90.60,23.70],[90.60,23.78],[90.53,23.78],[90.53,23.70]],
+    ],
+    72: [
+      [[90.34, 23.68],[90.55,23.68],[90.55,23.82],[90.34,23.82],[90.34,23.68]],
+      [[90.56, 23.69],[90.64,23.69],[90.64,23.79],[90.56,23.79],[90.56,23.69]],
+    ]
+  };
+
+  const map = new maplibregl.Map({
+    container: 'flood-demo-map',
+    style: 'https://basemap.openaq.org/styles/styles.json',
+    center: [90.46, 23.75],
+    zoom: 10,
+    interactive: true,
+  });
+
+  function toFeatureCollection(leadTime) {
+    const key = leadTime >= 72 ? 72 : leadTime >= 48 ? 48 : leadTime >= 24 ? 24 : 0;
+    return {
+      type: 'FeatureCollection',
+      features: polygonsByLead[key].map((coords, idx) => ({
+        type: 'Feature',
+        properties: { severity: idx === 0 ? 'severe' : 'warning' },
+        geometry: { type: 'Polygon', coordinates: [coords] },
+      })),
+    };
+  }
+
+  map.on('load', () => {
+    map.addSource('flood-risk', { type: 'geojson', data: toFeatureCollection(24) });
+    map.addLayer({
+      id: 'flood-risk-fill',
+      type: 'fill',
+      source: 'flood-risk',
+      paint: {
+        'fill-color': ['match', ['get', 'severity'], 'severe', '#d73027', 'warning', '#fc8d59', '#91bfdb'],
+        'fill-opacity': 0.45,
+      },
+    });
+    map.addLayer({
+      id: 'flood-risk-line',
+      type: 'line',
+      source: 'flood-risk',
+      paint: { 'line-color': '#9e1c1c', 'line-width': 2 },
+    });
+  });
+
+  const slider = document.getElementById('lead-slider');
+  const out = document.getElementById('lead-value');
+  slider?.addEventListener('input', (ev) => {
+    const value = Number(ev.target.value);
+    out.textContent = `+${value}h`;
+    const src = map.getSource('flood-risk');
+    if (src) src.setData(toFeatureCollection(value));
+  });
+</script>
+
+<style>
+  .flood-demo { display: grid; gap: 1rem; }
+  .toolbar { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .chip { background: var(--sl-color-blue-low); padding: .4rem .7rem; border-radius: 999px; font-size: .9rem; }
+  .map { height: 60vh; min-height: 360px; border-radius: .75rem; overflow: hidden; border: 1px solid var(--sl-color-hairline); }
+  .panels { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  article { padding: .85rem 1rem; border: 1px solid var(--sl-color-hairline); border-radius: .75rem; }
+  .swatch { width: 1rem; height: 1rem; display: inline-block; border-radius: 3px; margin-right: .5rem; vertical-align: text-bottom; }
+  .severe { background: #d73027; }
+  .warning { background: #fc8d59; }
+  .watch { background: #91bfdb; }
+</style>

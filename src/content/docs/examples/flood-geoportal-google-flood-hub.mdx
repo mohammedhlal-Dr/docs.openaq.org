@@ -1,0 +1,31 @@
+---
+title: Flood Geoportal Demo (Google Flood Hub style)
+description: Interactive demo with forecast slider, flood polygons, legend, and alert panel.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import FloodGeoportalDemo from '@components/FloodGeoportalDemo.astro';
+
+Here is a live **demo** of a flood geoportal experience inspired by Google Flood Hub.
+
+<Aside type="note">
+This demo uses synthetic polygons and simulated alert values to showcase portal UX patterns (map, lead-time slider, legend, and alerts).
+</Aside>
+
+## Interactive demo
+
+<FloodGeoportalDemo />
+
+## What this demo includes
+
+- Interactive map centered on a flood-prone area
+- Forecast lead-time slider (`0h` to `72h`)
+- Flood severity polygons that update with lead time
+- Legend panel for severity classes
+- Alert panel with affected-area summary
+
+## Next upgrade steps
+
+- Replace synthetic polygons with real flood raster/vector feeds
+- Connect alert cards to threshold rules (rainfall, gauge, depth)
+- Add admin boundary drill-down and export actions

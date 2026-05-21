@@ -87,6 +87,7 @@ export default defineConfig({
         label: 'Examples',
         items: [
           { label: 'Examples', slug: 'examples/examples' },
+          { label: 'Flood geoportal blueprint', slug: 'examples/flood-geoportal-google-flood-hub' },
         ],
       },
       {

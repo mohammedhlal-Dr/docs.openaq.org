@@ -1,0 +1,66 @@
+name: GéoSurvey – APK Android
+
+# Compile l'application GéoSurvey (dossier geosurvey/) en APK installable.
+# L'APK est téléchargeable dans l'onglet Actions, rubrique « Artifacts » du run.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'geosurvey/**'
+      - '.github/workflows/geosurvey-apk.yml'
+
+concurrency:
+  group: geosurvey-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: geosurvey
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: geosurvey/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Tests
+        run: npm test -- --ci
+
+      - name: Générer le projet Android
+        env:
+          CI: 1
+          # Facultatif : clé « Maps SDK for Android » enregistrée dans les secrets du dépôt.
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Compiler l'APK
+        working-directory: geosurvey/android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
+
+      - name: Renommer l'APK
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release.apk "dist/GeoSurvey-${GITHUB_SHA::7}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GeoSurvey-apk
+          path: geosurvey/dist/*.apk
+          if-no-files-found: error
+          retention-days: 30

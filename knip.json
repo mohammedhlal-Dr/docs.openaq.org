@@ -8,5 +8,6 @@
         "src/middleware.{js,ts}",
         "src/actions/index.{js,ts}"
       ]
-    }
+    },
+    "ignore": ["geosurvey/**"]
   }

@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "GéoSurvey",
+    "slug": "geosurvey",
+    "scheme": "geosurvey",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.geosurvey.app",
+      "infoPlist": {
+        "LSSupportsOpeningDocumentsInPlace": true,
+        "UIFileSharingEnabled": true
+      }
+    },
+    "android": {
+      "package": "com.geosurvey.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-sharing",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "GéoSurvey utilise votre position pour localiser les entités collectées sur le terrain."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "GéoSurvey utilise l'appareil photo pour joindre des photos aux entités collectées.",
+          "photosPermission": "GéoSurvey accède à vos photos pour les joindre aux entités collectées.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
